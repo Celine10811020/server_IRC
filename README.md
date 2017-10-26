@@ -13,4 +13,4 @@ Launch the server:
 Launch the client:
 
 > *./client*
-## At this time the client is unstable, I recommend to use Netcat or Telnet client (the both are supported)
+### At this time the client is unstable, I recommend to use Netcat or Telnet client (the both are supported)
