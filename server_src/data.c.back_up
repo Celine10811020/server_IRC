@@ -1,0 +1,85 @@
+/*
+** data.c for data in /home/nasrat_v/Dev/rendu/tek2/C/Systeme-Unix/Reseau/PSU_2016_myirc
+** 
+** Made by Valentin Nasraty
+** Login   <valentin.nasraty@epitech.eu>
+** 
+** Started on  Fri May 26 17:29:15 2017 Valentin Nasraty
+** Last update Sat Jun 10 18:14:55 2017 Valentin Nasraty
+*/
+
+#include "server.h"
+
+void			write_data_on_channel(char *msg, t_client *sender)
+{
+  t_client		*tmp_cl;
+
+  tmp_cl = sender->current_chan->client;
+  while (tmp_cl != NULL)
+    {
+      if (tmp_cl->fd_sock != sender->fd_sock)
+	{
+	  putclient("[", tmp_cl->fd_sock);
+	  putclient(sender->nickname, tmp_cl->fd_sock);
+	  putclient("] ", tmp_cl->fd_sock);
+	  putclient(msg, tmp_cl->fd_sock);
+	  putclient("\r\n", tmp_cl->fd_sock);
+	}
+      tmp_cl = tmp_cl->next;
+    }
+}
+
+void			putstring(char *str)
+{
+  int			i;
+
+  i = -1;
+  while (str[++i])
+    {
+      if (str[i] == '\r')
+	write(1, "[carriage return]", 17);
+      else if (str[i] == '\n')
+	write(1, "[new line]", 10);
+      else
+	write(1, &str[i], 1);
+    }
+}
+
+int			transfert_data(t_channel *ch, t_server *srv)
+{
+  int			i;
+  int			res;
+  char			*msg;
+  char			*backup_msg;
+  t_client		*tmp;
+  char			**all_cmd;
+
+  tmp = ch->client;
+  while (tmp != NULL)
+    {
+      if (FD_ISSET(tmp->fd_sock, &srv->readf))
+	{
+	  if (((msg = receive_msg(tmp, ch)) == NULL) ||
+	      ((backup_msg = strdup(msg)) == NULL))
+	    return (FAILURE);
+	  else if (strncmp(backup_msg, EOF_SIGNAL, strlen(EOF_SIGNAL)) != 0)
+	    {
+	      if ((all_cmd = str_to_wordtab_bis(msg, '\r', '\n')) == NULL)
+		return (FAILURE);
+	      i = -1;
+	      while (all_cmd[++i])
+		{
+		  if ((res = commander(srv, ch, tmp, all_cmd[i])) == 1)
+		    write_data_on_channel(backup_msg, tmp);
+		  else if (res == DECONNECTED)
+		    all_cmd[i + 1] = NULL;
+		}
+	      free(msg);
+	      free(all_cmd);
+	    }
+	  free(backup_msg);
+	}
+      tmp = tmp->next;
+    }
+  return (SUCCESS);
+}
