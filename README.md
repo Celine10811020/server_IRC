@@ -3,7 +3,22 @@ A simple IRC server and IRC client.
 Protocol compliant RFC 1459, written in C.
 
 # Compile
+compiling:
+    
     make
+    
+cleaning obj files:
+
+    make clean
+    
+cleaning binary files:
+
+    make fclean
+    
+    
+cleaning all and compile:
+
+    make re
 
 # How to use it
 Launch the server:
