@@ -13,7 +13,7 @@
 
 # define SIZE_BUFF	512
 # define INPUT		0
-# define OUTPUT   1
+# define OUTPUT     1
 # define FAILURE	0
 # define SUCCESS	!(FAILURE)
 # define BAD_ADDR	404
